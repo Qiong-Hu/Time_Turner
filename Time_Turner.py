@@ -4,37 +4,37 @@ from matplotlib import get_backend
 import time
 import numpy as np
 import winsound
+import json
 
-class Clock():
+class Time_Turner(object):
     def __init__(self):
+        plt.rcParams['font.sans-serif'] = ['SimHei']
+
         # Params for plot
         self.linewidth = 6
         self.gap = 0.17
         self.base_pos = [[1, 1], [2.5, 1], [4.5, 1], [6, 1]]
 
-        # Personalized time transform rules and exempt rules
-        # Experiment 1 (test during 7.13-8.29):
-        # self.rule_turning_point     = [[0, 0], [ 7, 0], [8, 0], [11, 0], [12,0], [12,30], [14,30], [16,30], [17,30], [19,0], [20, 0], [22,30], [24, 0]]
-        # self.rule_ref_turning_point = [[5,30], [12,30], [2,30], [12,30], [9, 0], [ 3, 0], [ 3, 0], [18,30], [20,30], [22,0], [ 2,30], [ 5, 0]]
-        # self.rule_speed             = [     1,     2.5,      1,     2.5,      3,       1,       1,       2,       1,      2,       1,       1]
-        # self.rule_name              = ["睡眠",   "家务", "学习",  "用餐",  "睡眠",  "学习",  "学习",   "家务",  "用餐", "电影",   "娱乐",  "家务"]
-
-        # Experiment 2 (test begin 8.29):
-        # self.rule_turning_point     = [[0,0], [7, 0], [8, 0], [16,0], [18,0], [24, 0]]
-        # self.rule_ref_turning_point = [[6,0], [13,0], [14,0], [22,0], [0, 0]]
-        # self.rule_speed             = [    1,      1,      1,      1,      1]
-        # self.rule_name              = ["睡眠", "用餐", "学习", "用餐", "写作"]
-
-        self.rule_turning_point 	= [[0,0],[21,0], [24,0]]
-        self.rule_ref_turning_point = [[6,0],[3, 0]]
-        self.rule_speed 			= [    1,     1]
-        self.rule_name				= ""
-
-        # Format: [weekday, start_hour, start_min, end_hour, end_min]
-        self.rule_exempt_period = [[3, 13, 0, 14, 30], [4, 0, 0, 15, 0]]
-
+        self.register_rules()
         self.register_turning_point()
         self.register_exempt_time()
+
+    def register_rules(self):
+        with open("time_turner_content.txt", "r", encoding='utf-8') as f:
+            lines = f.readlines()
+        for line in lines:
+            line = line.strip("\n")
+            if not line.startswith("#") and len(line) > 0:
+                if line.lstrip('{"').startswith("rule_turning_point"):
+                    self.rule_turning_point = json.loads(line)["rule_turning_point"]
+                if line.lstrip('{"').startswith("rule_ref_turning_point"):
+                    self.rule_ref_turning_point = json.loads(line)["rule_ref_turning_point"]
+                if line.lstrip('{"').startswith("rule_speed"):
+                    self.rule_speed = json.loads(line)["rule_speed"]
+                if line.lstrip('{"').startswith("rule_name"):
+                    self.rule_name = json.loads(line)["rule_name"]
+                if line.lstrip('{"').startswith("rule_exempt_period"):
+                    self.rule_exempt_period = json.loads(line)["rule_exempt_period"]
 
     # map num 0-9 to index in digital display
     def num_to_lineindex(self, num):
@@ -141,7 +141,7 @@ class Clock():
         for rule_idx in range(len(self.real_turning_point) - 1):
             if self.real_turning_point[rule_idx] <= time_cal < self.real_turning_point[rule_idx + 1]:
                 time_new = self.rule_speed[rule_idx] * (time_cal - self.real_turning_point[rule_idx]) + self.ref_turning_point[rule_idx]
-                if self.rule_name != "":
+                if len(self.rule_name) > 0:
                 	task_name = self.rule_name[rule_idx] + "，或者不" + self.rule_name[rule_idx] + "，是你的选择"
                 break
 
@@ -221,8 +221,5 @@ class Clock():
             plt.pause(20)
         plt.ioff()
 
-plt.rcParams['font.sans-serif'] = ['SimHei']
-
-clock = Clock()
-if __name__ == "__main__":
-    clock.main()
+time_turner = Time_Turner()
+time_turner.main()

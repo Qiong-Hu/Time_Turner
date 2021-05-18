@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# Copyright: Qiong Hu (junesirius@ucla.edu)
 import matplotlib.pyplot as plt
 from matplotlib import get_backend
 import time
@@ -14,12 +13,23 @@ class Clock():
         self.base_pos = [[1, 1], [2.5, 1], [4.5, 1], [6, 1]]
 
         # Personalized time transform rules and exempt rules
-        self.rule_turning_point     = [[0, 0], [ 7, 0], [8, 0], [11, 0], [12,0], [12,30], [14,30], [16,30], [17,30], [19,0], [20, 0], [22,30], [24, 0]]
-        self.rule_ref_turning_point = [[5,30], [12,30], [2,30], [12,30], [9, 0], [ 3, 0], [ 3, 0], [18,30], [20,30], [22,0], [ 2,30], [ 5, 0]]
-        self.rule_speed             = [     1,     2.5,      1,     2.5,      3,       1,       1,       2,       1,      2,       1,       1]
-        self.rule_name              = ["睡眠",   "家务", "学习",  "用餐",  "睡眠",  "学习",  "学习",   "家务",  "用餐", "电影",   "娱乐",  "家务"]
+        # Experiment 1 (test during 7.13-8.29):
+        # self.rule_turning_point     = [[0, 0], [ 7, 0], [8, 0], [11, 0], [12,0], [12,30], [14,30], [16,30], [17,30], [19,0], [20, 0], [22,30], [24, 0]]
+        # self.rule_ref_turning_point = [[5,30], [12,30], [2,30], [12,30], [9, 0], [ 3, 0], [ 3, 0], [18,30], [20,30], [22,0], [ 2,30], [ 5, 0]]
+        # self.rule_speed             = [     1,     2.5,      1,     2.5,      3,       1,       1,       2,       1,      2,       1,       1]
+        # self.rule_name              = ["睡眠",   "家务", "学习",  "用餐",  "睡眠",  "学习",  "学习",   "家务",  "用餐", "电影",   "娱乐",  "家务"]
 
-        # Personalized exampt rules
+        # Experiment 2 (test begin 8.29):
+        # self.rule_turning_point     = [[0,0], [7, 0], [8, 0], [16,0], [18,0], [24, 0]]
+        # self.rule_ref_turning_point = [[6,0], [13,0], [14,0], [22,0], [0, 0]]
+        # self.rule_speed             = [    1,      1,      1,      1,      1]
+        # self.rule_name              = ["睡眠", "用餐", "学习", "用餐", "写作"]
+
+        self.rule_turning_point 	= [[0,0],[21,0], [24,0]]
+        self.rule_ref_turning_point = [[6,0],[3, 0]]
+        self.rule_speed 			= [    1,     1]
+        self.rule_name				= ""
+
         # Format: [weekday, start_hour, start_min, end_hour, end_min]
         self.rule_exempt_period = [[3, 13, 0, 14, 30], [4, 0, 0, 15, 0]]
 
@@ -131,7 +141,8 @@ class Clock():
         for rule_idx in range(len(self.real_turning_point) - 1):
             if self.real_turning_point[rule_idx] <= time_cal < self.real_turning_point[rule_idx + 1]:
                 time_new = self.rule_speed[rule_idx] * (time_cal - self.real_turning_point[rule_idx]) + self.ref_turning_point[rule_idx]
-                task_name = self.rule_name[rule_idx] + "，或者不" + self.rule_name[rule_idx] + "，是你的选择"
+                if self.rule_name != "":
+                	task_name = self.rule_name[rule_idx] + "，或者不" + self.rule_name[rule_idx] + "，是你的选择"
                 break
 
         hour_new, minute_new = self.minute_to_hour(time_new)

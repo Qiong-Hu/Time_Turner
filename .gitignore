@@ -1,1 +1,5 @@
-.pdf
+*.pdf
+*.xlsx
+*.csv
+*.txt
+*.svg
